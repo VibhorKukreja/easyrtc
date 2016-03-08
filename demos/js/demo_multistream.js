@@ -1,5 +1,5 @@
 //
-//Copyright (c) 2014, Priologic Software Inc.
+//Copyright (c) 2015, Priologic Software Inc.
 //All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ function createLabelledButton(buttonLabel) {
 }
 
 
-function addMediaStreamToDiv(divId, stream, streamName)
+function addMediaStreamToDiv(divId, stream, streamName, isLocal)
 {
     var container = document.createElement("div");
     container.style.marginBottom = "10px";
@@ -61,11 +61,11 @@ function addMediaStreamToDiv(divId, stream, streamName)
     var video = document.createElement("video");
     video.width = 320;
     video.height = 240;
+    video.muted = isLocal;
     video.style.verticalAlign= "middle";
     container.appendChild(video);
     document.getElementById(divId).appendChild(container);
     video.autoplay = true;
-    video.muted = false;
     easyrtc.setVideoObjectSrc(video, stream);
     return labelBlock;
 }
@@ -73,14 +73,15 @@ function addMediaStreamToDiv(divId, stream, streamName)
 
 
 function createLocalVideo(stream, streamName) {
-    var labelBlock = addMediaStreamToDiv("localVideos", stream, streamName);
+    var labelBlock = addMediaStreamToDiv("localVideos", stream, streamName, true);
     var closeButton = createLabelledButton("close");
     closeButton.onclick = function() {
         easyrtc.closeLocalStream(streamName);
         labelBlock.parentNode.parentNode.removeChild(labelBlock.parentNode);
     }
     labelBlock.appendChild(closeButton);
-    
+
+    console.log("created local video, stream.streamName = " + stream.streamName);
 }
 
 function addSrcButton(buttonLabel, videoId) {
@@ -91,7 +92,9 @@ function addSrcButton(buttonLabel, videoId) {
                 function(stream) {
                     createLocalVideo(stream, buttonLabel);
                     if( otherEasyrtcid) {
-                        easyrtc.addStreamToCall(otherEasyrtcid, buttonLabel);
+                        easyrtc.addStreamToCall(otherEasyrtcid, buttonLabel, function(easyrtcid, streamName){
+                            easyrtc.showError("Informational", "other party " + easyrtcid + " acknowledges receiving " + streamName);
+                        });
                     }
                 },
                 function(errCode, errText) {
@@ -220,9 +223,10 @@ function disconnect() {
 }
 
 easyrtc.setStreamAcceptor(function(easyrtcid, stream, streamName) {
-    var labelBlock = addMediaStreamToDiv("remoteVideos", stream, streamName);
+    var labelBlock = addMediaStreamToDiv("remoteVideos", stream, streamName, false);
     labelBlock.parentNode.id = "remoteBlock" + easyrtcid + streamName;
-
+    console.log("accepted incoming stream with name " + stream.streamName);
+    console.log("checking incoming " + easyrtc.getNameOfRemoteStream(easyrtcid, stream));
 });
 
 

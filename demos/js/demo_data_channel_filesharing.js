@@ -1,5 +1,5 @@
 //
-//Copyright (c) 2014, Priologic Software Inc.
+//Copyright (c) 2015, Priologic Software Inc.
 //All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -135,7 +135,7 @@ function convertListToButtons(roomName, occupants, isPrimary) {
                 case "working":
                     statusDiv.innerHTML = state.name + ":" + state.position + "/" + state.size + "(" + state.numFiles + " files)";
                     break;
-                case "cancelled":
+                case "rejected":
                     statusDiv.innerHTML = "cancelled";
                     setTimeout(function() {
                         statusDiv.innerHTML = "";

@@ -1,5 +1,5 @@
 //
-//Copyright (c) 2014, Priologic Software Inc.
+//Copyright (c) 2015, Priologic Software Inc.
 //All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,13 @@ function enable(domId) {
 }
 
 
-function connect() {
-    easyrtc.enableAudio(document.getElementById('shareAudio').checked);
-    easyrtc.enableVideo(document.getElementById('shareVideo').checked);
-    easyrtc.setRoomOccupantListener(convertListToButtons);
-    easyrtc.connect("easyrtc.audioVideo", loginSuccess, loginFailure);
-
-}
+function connect() {	
+  easyrtc.enableAudio(document.getElementById("shareAudio").checked);
+  easyrtc.enableVideo(document.getElementById("shareVideo").checked);
+  easyrtc.enableDataChannels(true);
+  easyrtc.setRoomOccupantListener( convertListToButtons);    
+  easyrtc.connect("easyrtc.audioVideo", loginSuccess, loginFailure);			  
+} 
 
 
 function hangup() {
@@ -96,7 +96,9 @@ function performCall(otherEasyrtcid) {
     };
 
     var successCB = function() {
-        setUpMirror();
+        if( easyrtc.getLocalStream()) {
+            setUpMirror();
+        }
         enable('hangupButton');
     };
     var failureCB = function() {
@@ -109,10 +111,11 @@ function performCall(otherEasyrtcid) {
 
 function loginSuccess(easyrtcid) {
     disable("connectButton");
-  //  enable("disconnectButton");
+    enable("disconnectButton");
     enable('otherClients');
     selfEasyrtcid = easyrtcid;
     document.getElementById("iam").innerHTML = "I am " + easyrtc.cleanId(easyrtcid);
+    easyrtc.showError("noerror", "logged in");
 }
 
 
@@ -120,15 +123,17 @@ function loginFailure(errorCode, message) {
     easyrtc.showError(errorCode, message);
 }
 
-
 function disconnect() {
-    document.getElementById("iam").innerHTML = "logged out";
-    easyrtc.disconnect();
-    enable("connectButton");
-//    disable("disconnectButton");
-    clearConnectList();
-    easyrtc.setVideoObjectSrc(document.getElementById('selfVideo'), "");
-}
+  easyrtc.disconnect();			  
+  document.getElementById("iam").innerHTML = "logged out";
+  enable("connectButton");
+  disable("disconnectButton"); 
+  easyrtc.clearMediaStream( document.getElementById('selfVideo'));
+  easyrtc.setVideoObjectSrc(document.getElementById("selfVideo"),"");
+  easyrtc.closeLocalMediaStream();
+  easyrtc.setRoomOccupantListener( function(){});  
+  clearConnectList();
+} 
 
 
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {

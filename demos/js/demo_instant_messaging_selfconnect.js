@@ -1,5 +1,5 @@
 //
-//Copyright (c) 2014, Priologic Software Inc.
+//Copyright (c) 2015, Priologic Software Inc.
 //All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ function addToConversation(who, msgType, content) {
 
 
 
-function connect() {
+function connect(immediateMode) {
     easyrtc.setPeerListener(addToConversation);
     easyrtc.setRoomOccupantListener(convertListToButtons);
     
@@ -51,8 +51,14 @@ function connect() {
         console.log("application allocated socket ", mysocket);
         easyrtc.useThisSocketConnection(mysocket);
     }
-    
-    easyrtc.connect("easyrtc.reconnect", loginSuccess, loginFailure);
+    if( immediateMode) {
+        easyrtc.connect("easyrtc.reconnect", loginSuccess, loginFailure);
+    }
+    else {
+        setTimeout(function() {
+            easyrtc.connect("easyrtc.reconnect", loginSuccess, loginFailure);
+        }, 10*1000);
+    }
 }
 
 
@@ -95,6 +101,8 @@ function sendStuffWS(otherEasyrtcid) {
 function loginSuccess(easyrtcid) {
     selfEasyrtcid = easyrtcid;
     document.getElementById("iam").innerHTML = "I am " + easyrtcid;
+    document.getElementById("buttonImmediate").enabled = false;
+    document.getElementById("buttonDelayed").enabled = false;
 }
 
 
