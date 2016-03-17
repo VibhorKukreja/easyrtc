@@ -181,7 +181,8 @@ if (!window.createIceServer) {
     window.createIceServer = function(url, username, credential) {
         return {'url': url, 'credential': credential, 'username': username};
     };
-}/** @class
+};
+/** @class
  *@version 1.0.15
  *<p>
  * Provides client side support for the EasyRTC framework.
